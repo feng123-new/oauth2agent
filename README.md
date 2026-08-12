@@ -57,7 +57,12 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 python -m pip install -e .
 ```
 
-Python 3.10+。
+Python 3.10+。开发环境可以使用：
+
+```bash
+python -m pip install -e '.[dev]'
+pytest -q
+```
 
 ## 用法 A：像原项目一样直接登录
 
@@ -153,6 +158,12 @@ python -m oauth2agent simulate
 7. 模拟 `/responses` 可用；
 8. 模拟 `/conversations` 返回 403。
 
+另外，单元测试会在 PyNaCl 可用时覆盖上游 `encrypted_task_id` 的 sealed-box 解密路径；GitHub Actions 安装完整依赖后会执行这条测试。
+
+## 输入约束
+
+`convert` 只接受**单账号** OAuth 文件。若一个 JSON 中检测到多个不同的 `access_token` / `id_token`，工具会拒绝转换，避免把一个账号的 token 与另一个账号的 `account_id` 错配。请先从源系统单独导出目标账号。
+
 ## 安全提醒
 
 Agent Identity 文件没有 OAuth token，但仍包含可用于 Codex 的私钥，因此仍是敏感凭据：
@@ -170,3 +181,7 @@ Agent Identity 文件没有 OAuth token，但仍包含可用于 Codex 的私钥�
 - `BetterAndBetterII/codex-agent-identity` 的公开实验流程。
 
 本项目定位是“独立转换/生成器”，不嵌入 Sub2API 代码库。
+
+## 当前状态
+
+`0.2.0` 已通过本地单元测试和完整离线模拟。真实 OpenAI Agent Identity 接口仍属于开发中能力，因此第一次用于真实账号时建议先执行 `verify --check-isolation`，并保留原 OAuth 凭据的独立备份直到确认迁移成功。
